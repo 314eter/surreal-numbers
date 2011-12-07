@@ -1,3 +1,7 @@
+cdef class NumberIterator:
+    cdef unsigned current
+    cdef unsigned stop
+
 cdef class Numbers(dict):
     cpdef NumberIterator count(self, unsigned start=*, unsigned stop=*)
 
@@ -6,10 +10,6 @@ cdef class Number(int):
     cdef unsigned short _order
 
     cpdef unsigned order(self)
-
-cdef class NumberIterator:
-    cdef unsigned current
-    cdef unsigned stop
 
 cpdef inline unsigned nimsum(unsigned a, unsigned b)
 

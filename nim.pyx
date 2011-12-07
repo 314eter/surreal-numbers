@@ -1,3 +1,21 @@
+cdef class NumberIterator:
+    """Iterator over surreal numbers"""
+
+    def __cinit__(self, unsigned start=0, unsigned stop=0):
+        """Iterate over the interval [start, stop[."""
+        self.current = start
+        self.stop = stop
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.stop and self.current == self.stop:
+            raise StopIteration
+        self.current += 1
+        return N(self.current - 1)
+
+
 cdef class Numbers(dict):
     """The Field of surreal numbers"""
 
@@ -101,24 +119,6 @@ cdef class Number(int):
         return self._order
 
 
-cdef class NumberIterator:
-    """Iterator over surreal numbers"""
-
-    def __cinit__(self, unsigned start=0, unsigned stop=0):
-        """Iterate over the interval [start, stop[."""
-        self.current = start
-        self.stop = stop
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        if self.stop and self.current == self.stop:
-            raise StopIteration
-        self.current += 1
-        return N(self.current - 1)
-
-
 cpdef inline unsigned nimsum(unsigned a, unsigned b):
     """Return the nim-sum of a and b."""
     return a ^ b
@@ -132,13 +132,15 @@ cdef object exps2(unsigned n):
     """
     cdef unsigned short exp_n, exp_exp_n
     exponents = []
-    exp_n = n.bit_length()
-    for bit_n in bin(n)[2:]:
+    n_bits = bin(n)[2:]
+    exp_n = len(n_bits)
+    for bit_n in n_bits:
         exp_n -= 1
         if bit_n == '1':
             exponent = []
-            exp_exp_n = exp_n.bit_length()
-            for bit_exp_n in bin(exp_n)[2:]:
+            exp_n_bits = bin(exp_n)[2:]
+            exp_exp_n = len(exp_n_bits)
+            for bit_exp_n in exp_n_bits:
                 exp_exp_n -= 1
                 if bit_exp_n == '1':
                     exponent.append(exp_exp_n)
