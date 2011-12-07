@@ -83,7 +83,7 @@ cdef class Number(int):
     def __div__(unsigned self, unsigned other):
         return N(nimproduct(self, niminvert(other)))
 
-    def __pow__(self, int n, m):
+    def __pow__(self, long n, m):
         if n < 0:
             self = ~self
             n = -n
@@ -204,7 +204,7 @@ cpdef unsigned fermatproduct(object exps):
     fermattable[exps] = result
     return result
 
-cpdef unsigned nimpower(unsigned a, int n):
+cpdef unsigned nimpower(unsigned a, long n):
     """Return the power a**n based on nim-multiplication.
 
     Arguments:
