@@ -93,6 +93,13 @@ cdef class Number(int):
     def __contains__(unsigned self, unsigned item):
         return item < self
 
+    cpdef unsigned order(self):
+        if self == 0:
+            raise ZeroDivisionError
+        if not self._order:
+            self._order = nimorder(self)
+        return self._order
+
 
 cdef class NumberIterator:
     """Iterator over surreal numbers"""
@@ -227,3 +234,17 @@ cpdef unsigned niminvert(unsigned a):
         b = b**2
     x = a / b
     return nimproduct((a ^ x), niminvert(nimproduct(a, a ^ x)))
+
+cpdef unsigned nimorder(unsigned a):
+    cdef unsigned exp = 0
+    cdef unsigned field
+    if a == 1:
+        return 1
+    while 2**(2**exp) <= a:
+        exp += 1
+    field = 2**(2**exp) - 1
+    for exp in range(3, field):
+        if field % exp == 0 and nimpower(a, exp) == 1:
+            return exp
+    return field
+

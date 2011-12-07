@@ -3,6 +3,9 @@ cdef class Numbers(dict):
 
 cdef class Number(int):
     cdef Number _inv
+    cdef unsigned short _order
+
+    cpdef unsigned order(self)
 
 cdef class NumberIterator:
     cdef unsigned current
@@ -15,3 +18,5 @@ cpdef unsigned nimproduct(unsigned a, unsigned b)
 cpdef unsigned nimpower(unsigned a, int n)
 
 cpdef unsigned niminvert(unsigned a)
+
+cpdef unsigned nimorder(unsigned a)
