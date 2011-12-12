@@ -1,22 +1,22 @@
 cdef class NumberIterator:
-    cdef unsigned current
-    cdef unsigned stop
+    cdef unsigned long current
+    cdef unsigned long stop
 
 cdef class Numbers(dict):
-    cpdef NumberIterator count(self, unsigned start=*, unsigned stop=*)
+    cpdef NumberIterator count(self, unsigned long start=*, unsigned long stop=*)
 
 cdef class Number(int):
     cdef Number _inv
-    cdef unsigned _order
+    cdef unsigned long _order
 
-    cpdef unsigned order(self)
+    cpdef unsigned long order(self)
 
-cpdef inline unsigned nimsum(unsigned a, unsigned b)
+cpdef inline unsigned long nimsum(unsigned long a, unsigned long b)
 
-cpdef unsigned nimproduct(unsigned a, unsigned b)
+cpdef unsigned long nimproduct(unsigned long a, unsigned long b)
 
-cpdef unsigned nimpower(unsigned a, long n)
+cpdef unsigned long nimpower(unsigned long a, long n)
 
-cpdef unsigned niminvert(unsigned a)
+cpdef unsigned long niminvert(unsigned long a)
 
-cpdef unsigned nimorder(unsigned a)
+cpdef unsigned long nimorder(unsigned long a)

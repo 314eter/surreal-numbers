@@ -1,7 +1,7 @@
 cdef class NumberIterator:
     """Iterator over surreal numbers"""
 
-    def __cinit__(self, unsigned start=0, unsigned stop=0):
+    def __cinit__(self, unsigned long start=0, unsigned long stop=0):
         """Iterate over the interval [start, stop[."""
         self.current = start
         self.stop = stop
@@ -22,7 +22,7 @@ cdef class Numbers(dict):
     def __repr__(self):
         return 'Field of surreal numbers'
 
-    def __call__(self, unsigned n):
+    def __call__(self, unsigned long n):
         """Return the number n
         
         Arguments:
@@ -37,7 +37,7 @@ cdef class Numbers(dict):
         """Return an iterator over all numbers."""
         return NumberIterator()
 
-    cpdef NumberIterator count(self, unsigned start=0, unsigned stop=0):
+    cpdef NumberIterator count(self, unsigned long start=0, unsigned long stop=0):
         """Return an iterator over a range of Numbers.
 
         Arguments:
@@ -71,16 +71,16 @@ cdef class Number(int):
     def __repr__(self):
         return 'N(' + int.__repr__(self) + ')'
 
-    def __add__(unsigned self, unsigned other):
+    def __add__(unsigned long self, unsigned long other):
         return N(self ^ other)
 
-    def __sub__(unsigned self, unsigned other):
+    def __sub__(unsigned long self, unsigned long other):
         return N(self ^ other)
 
-    def __mul__(unsigned self, unsigned other):
+    def __mul__(unsigned long self, unsigned long other):
         return N(nimproduct(self, other))
 
-    def __div__(unsigned self, unsigned other):
+    def __div__(unsigned long self, unsigned long other):
         return N(nimproduct(self, niminvert(other)))
 
     def __pow__(self, long n, m):
@@ -102,16 +102,16 @@ cdef class Number(int):
             self._inv = N(niminvert(self))
         return self._inv
 
-    def __iter__(unsigned self):
+    def __iter__(unsigned long self):
         return NumberIterator(stop=self)
 
-    def __len__(unsigned self):
+    def __len__(unsigned long self):
         return self
 
-    def __contains__(unsigned self, unsigned item):
+    def __contains__(unsigned long self, unsigned long item):
         return item < self
 
-    cpdef unsigned order(self):
+    cpdef unsigned long order(self):
         if self == 0:
             raise ZeroDivisionError
         if not self._order:
@@ -119,13 +119,13 @@ cdef class Number(int):
         return self._order
 
 
-cpdef inline unsigned nimsum(unsigned a, unsigned b):
+cpdef inline unsigned long nimsum(unsigned long a, unsigned long b):
     """Return the nim-sum of a and b."""
     return a ^ b
 
 expstable = dict()
 
-cdef object exps2(unsigned n):
+cdef object exps2(unsigned long n):
     """Rewrite n as the sum of products of fermatpowers.
     
     A list of lists of exponents is returned such that:
@@ -152,7 +152,7 @@ cdef object exps2(unsigned n):
     expstable[n] = exponents
     return exponents
 
-cpdef unsigned nimproduct(unsigned a, unsigned b):
+cpdef unsigned long nimproduct(unsigned long a, unsigned long b):
     """Return the nim-product of a and b.
     
     Algorithm:
@@ -165,7 +165,7 @@ cpdef unsigned nimproduct(unsigned a, unsigned b):
     - Compute nim-sum of terms
 
     """
-    cdef unsigned result = 0
+    cdef unsigned long result = 0
     f = set()
     for l in exps2(a):
         for r in exps2(b):
@@ -180,7 +180,7 @@ cpdef unsigned nimproduct(unsigned a, unsigned b):
 
 fermattable = dict()
 
-cpdef unsigned fermatproduct(object exps):
+cpdef unsigned long fermatproduct(object exps):
     """Return nim-product of one term (product of fermatpowers).
 
     Arguments:
@@ -193,7 +193,7 @@ cpdef unsigned fermatproduct(object exps):
       fermatproduct(exps) = fermatproduct(a) + fermatproduct(b)
 
     """
-    cdef unsigned result = 0
+    cdef unsigned long result = 0
     cdef int i = len(exps) - 1
     while i > 0 and exps[i] != exps[i - 1]:
         i -= 1
@@ -209,7 +209,7 @@ cpdef unsigned fermatproduct(object exps):
     fermattable[exps] = result
     return result
 
-cpdef unsigned nimpower(unsigned a, long n):
+cpdef unsigned long nimpower(unsigned long a, long n):
     """Return the power a**n based on nim-multiplication.
 
     Arguments:
@@ -220,21 +220,21 @@ cpdef unsigned nimpower(unsigned a, long n):
     Exponentiation by squaring
 
     """
-    cdef unsigned result = 1
+    cdef unsigned long result = 1
     for b in bin(n)[2:]:
         result = nimproduct(result, result)
         if b == '1':
             result = nimproduct(result, a)
     return result
 
-cpdef unsigned niminvert(unsigned a):
+cpdef unsigned long niminvert(unsigned long a):
     """Return the nim-multiplicative inverse of a.
 
     Algorithm:
     As described in Ex. 5 of "Nim Multiplication" by H. W. Lenstra
 
     """
-    cdef unsigned b = 2, x
+    cdef unsigned long b = 2, x
     if a == 1:
         return 1
     while b**2 <= a:
@@ -242,9 +242,9 @@ cpdef unsigned niminvert(unsigned a):
     x = a / b
     return nimproduct((a ^ x), niminvert(nimproduct(a, a ^ x)))
 
-cpdef unsigned nimorder(unsigned a):
-    cdef unsigned exp = 0
-    cdef unsigned field
+cpdef unsigned long nimorder(unsigned long a):
+    cdef unsigned long exp = 0
+    cdef unsigned long field
     if a == 1:
         return 1
     while 2**(2**exp) <= a:
