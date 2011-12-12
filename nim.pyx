@@ -123,6 +123,8 @@ cpdef inline unsigned nimsum(unsigned a, unsigned b):
     """Return the nim-sum of a and b."""
     return a ^ b
 
+expstable = dict()
+
 cdef object exps2(unsigned n):
     """Rewrite n as the sum of products of fermatpowers.
     
@@ -131,6 +133,8 @@ cdef object exps2(unsigned n):
     
     """
     cdef unsigned short exp_n, exp_exp_n
+    if n in expstable:
+        return expstable[n]
     exponents = []
     n_bits = bin(n)[2:]
     exp_n = len(n_bits)
@@ -145,6 +149,7 @@ cdef object exps2(unsigned n):
                 if bit_exp_n == '1':
                     exponent.append(exp_exp_n)
             exponents.append(exponent)
+    expstable[n] = exponents
     return exponents
 
 cpdef unsigned nimproduct(unsigned a, unsigned b):
@@ -173,7 +178,7 @@ cpdef unsigned nimproduct(unsigned a, unsigned b):
         result ^= fermatproduct(exps)
     return result
 
-fermattable = {}
+fermattable = dict()
 
 cpdef unsigned fermatproduct(object exps):
     """Return nim-product of one term (product of fermatpowers).
