@@ -1,6 +1,7 @@
 #cython: cdivision=True
 from nim cimport nimproduct
-from libc.stdlib cimport calloc, free
+from libc.stdlib cimport malloc, free
+from libc.string cimport memset
 
 cdef unsigned long* prods
 
@@ -15,18 +16,18 @@ cpdef unsigned long knights(unsigned long size, unsigned long previous):
     cdef unsigned long v, w, t, m, i, n0
     cdef unsigned short exp, u, l = log(size)
     global prods
+    prods = <unsigned long*>malloc(2 * l * sizeof(unsigned long))
     for u in range(l):
         v = 2**u
         for w in range(v):
             t = v + w
-            prods = <unsigned long*>calloc(2 * l, sizeof(unsigned long))
+            memset(prods, 0, 2 * l * sizeof(unsigned long))
             m = nimproduct(size / 2, nimproduct(t, t))
             for i in range(size / (2*v)):
                 for n0 in range(2*v*i, 2*v*i + v):
                     if m ^ prod(n0, t) == previous:
                         free(prods)
                         return t * size + n0
-            free(prods)
 
 cdef unsigned long prod(unsigned long n, unsigned long t):
     cdef unsigned long product, res = 0
