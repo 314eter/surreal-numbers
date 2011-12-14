@@ -1,3 +1,4 @@
+#cython: cdivision=True
 cdef class NumberIterator:
     """Iterator over surreal numbers"""
 
@@ -180,7 +181,7 @@ cpdef unsigned long nimproduct(unsigned long a, unsigned long b):
 
 fermattable = dict()
 
-cpdef unsigned long fermatproduct(object exps):
+cdef unsigned long fermatproduct(object exps):
     """Return nim-product of one term (product of fermatpowers).
 
     Arguments:
