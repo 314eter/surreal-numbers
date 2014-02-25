@@ -1,4 +1,7 @@
+#cython: boundscheck=False
+#cython: wraparound=False
 #cython: cdivision=True
+#cython: overflowcheck=False
 cdef class NumberIterator:
     """Iterator over surreal numbers"""
 
@@ -25,10 +28,10 @@ cdef class Numbers(dict):
 
     def __call__(self, unsigned long n):
         """Return the number n
-        
+
         Arguments:
         n -- an integer to convert to a surreal number
-        
+
         """
         if n not in self:
             self[n] = Number(n)
@@ -53,7 +56,7 @@ N = Numbers()
 
 cdef class Number(int):
     """A surreal number
-    
+
     This class inherits from int, and overrides +-*/ with nim-operations.
     The preferred way to initialize is N(a).
 
@@ -124,38 +127,37 @@ cpdef inline unsigned long nimsum(unsigned long a, unsigned long b):
     """Return the nim-sum of a and b."""
     return a ^ b
 
-expstable = dict()
+cdef dict expstable = dict()
 
 cdef object exps2(unsigned long n):
     """Rewrite n as the sum of products of fermatpowers.
-    
+
     A list of lists of exponents is returned such that:
     n = sum(2**(sum(2**n for n in exps)) for exps in exps2(n))
-    
+
     """
-    cdef unsigned short exp_n, exp_exp_n
+    cdef unsigned short i = 0, j
+    cdef unsigned long m = 1
     if n in expstable:
         return expstable[n]
     exponents = []
-    n_bits = bin(n)[2:]
-    exp_n = len(n_bits)
-    for bit_n in n_bits:
-        exp_n -= 1
-        if bit_n == '1':
+    while n >= m:
+        if n & m:
             exponent = []
-            exp_n_bits = bin(exp_n)[2:]
-            exp_exp_n = len(exp_n_bits)
-            for bit_exp_n in exp_n_bits:
-                exp_exp_n -= 1
-                if bit_exp_n == '1':
-                    exponent.append(exp_exp_n)
+            j = 0
+            while i >= (1 << j):
+                if i & (1 << j):
+                    exponent.append(j)
+                j += 1
             exponents.append(exponent)
+        i += 1
+        m = m << 1
     expstable[n] = exponents
     return exponents
 
 cpdef unsigned long nimproduct(unsigned long a, unsigned long b):
     """Return the nim-product of a and b.
-    
+
     Algorithm:
     - Rewrite a and b with exps2
     - Compute product with distributivuty of multiplication over addition.
@@ -179,7 +181,7 @@ cpdef unsigned long nimproduct(unsigned long a, unsigned long b):
         result ^= fermatproduct(exps)
     return result
 
-fermattable = dict()
+cdef dict fermattable = dict()
 
 cdef unsigned long fermatproduct(object exps):
     """Return nim-product of one term (product of fermatpowers).
@@ -221,7 +223,7 @@ cpdef unsigned long nimpower(unsigned long a, long n):
     Exponentiation by squaring
 
     """
-    cdef unsigned long result = 1
+    cdef unsigned long i = 0, result = 1
     for b in bin(n)[2:]:
         result = nimproduct(result, result)
         if b == '1':
@@ -235,7 +237,7 @@ cpdef unsigned long niminvert(unsigned long a):
     As described in Ex. 5 of "Nim Multiplication" by H. W. Lenstra
 
     """
-    cdef unsigned long b = 2, x
+    cdef unsigned long x, b = 2
     if a == 1:
         return 1
     while b**2 <= a:
@@ -255,4 +257,3 @@ cpdef unsigned long nimorder(unsigned long a):
         if field % exp == 0 and nimpower(a, exp) == 1:
             return exp
     return field
-
