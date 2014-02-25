@@ -1,41 +1,42 @@
-#cython: boundscheck=False
-#cython: wraparound=False
-#cython: cdivision=True
-#cython: overflowcheck=False
-from nim cimport nimproduct
-from libc.stdlib cimport malloc, free
-from libc.string cimport memset
+from sage.rings.integer cimport Integer
 
-cdef unsigned long* prods
+cdef zero = Integer(0)
+cdef two = Integer(2)
 
-cpdef unsigned long knight(unsigned short n, unsigned long previous, unsigned long start=0):
-    cdef unsigned long size, v, w, t, m, i, n0
-    cdef unsigned short exp, u, l = 2**n
-    global prods
-    prods = <unsigned long*>malloc(2 * l * sizeof(unsigned long))
-    size = 2**l
-    for u in range(l / 4, l):
-        v = 2**u
-        for w in range(v):
-            t = v + w
-            print 't:', t
-            memset(prods, 0, 2 * l * sizeof(unsigned long))
-            m = nimproduct(size >> 1, nimproduct(t, t))
-            for i in range(size / (2*v)):
-                for n0 in range(2*v*i, 2*v*i + v):
-                    if m ^ prod(n0, t) == previous:
-                        free(prods)
-                        return t * size + n0
+cpdef Integer knight(int n, Integer k_n):
+    cdef Integer w, t0, t, m, i, maxi, x0, maxx0
+    cdef int u
+    for u in range(2**n):
+        w = two**u
+        t0 = zero
+        while t0 < w:
+            t = w + t0
+            prods.clear()
+            m = nimproduct(two**(2**n - 1), nimproduct(t, t))
+            i = zero
+            maxi = two**(2**n - u - 1)
+            while i < maxi:
+                x0 = i * 2 * w
+                maxx0 = i * 2 * w + w
+                while x0 < maxx0:
+                    if m ^ prod(x0, t) == k_n:
+                        return t * two**(2**n) + x0
+                    x0 += 1
+                i += 1
+            t0 += 1
 
-cdef unsigned long prod(unsigned long n, unsigned long t):
-    cdef unsigned long res = 0
-    cdef unsigned short exp = 0
-    global prods
-    while n:
-        if n & 1:
-            if not prods[exp]:
-                prods[exp] = nimproduct(2**exp, 2**exp ^ t)
-            res ^= prods[exp]
-        exp += 1
-        n >>= 1
-    return res
+cdef dict prods = dict()
+cdef dict squares = dict()
+
+cdef Integer prod(Integer x, Integer t):
+    cdef Integer result = zero
+    cdef int l = x.nbits()
+    for exp in range(l):
+        if x.test_bit(exp):
+            if exp not in prods:
+                if exp not in squares:
+                    squares[exp] = nimproduct(two**exp, two**exp)
+                prods[exp] = squares[exp] ^ nimproduct(t, two**exp)
+            result ^= prods[exp]
+    return result
+
